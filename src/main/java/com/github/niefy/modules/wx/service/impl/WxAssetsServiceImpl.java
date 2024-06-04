@@ -5,8 +5,11 @@ import com.github.niefy.modules.wx.service.WxAssetsService;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.api.WxConsts;
 import me.chanjar.weixin.common.error.WxErrorException;
+import me.chanjar.weixin.mp.api.WxMpMaterialService;
 import me.chanjar.weixin.mp.api.WxMpService;
+import me.chanjar.weixin.mp.api.impl.WxMpMaterialServiceImpl;
 import me.chanjar.weixin.mp.bean.draft.*;
+import me.chanjar.weixin.mp.bean.freepublish.WxMpFreePublishList;
 import me.chanjar.weixin.mp.bean.material.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
@@ -16,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -33,7 +37,10 @@ public class WxAssetsServiceImpl implements WxAssetsService {
     public WxMpMaterialCountResult materialCount(String appid) throws WxErrorException {
         log.info("从API获取素材总量");
         wxMpService.switchoverTo(appid);
-        return wxMpService.getMaterialService().materialCount();
+        WxMpMaterialCountResult wxMpMaterialCountResult = wxMpService.getMaterialService().materialCount();
+        Long aLong = wxMpService.getDraftService().countDraft();
+        wxMpMaterialCountResult.setNewsCount(Integer.parseInt(String.valueOf(aLong)));
+        return wxMpMaterialCountResult;
     }
 
     @Override
@@ -65,18 +72,41 @@ public class WxAssetsServiceImpl implements WxAssetsService {
     }
 
     @Override
-    @CacheEvict(allEntries = true)
-    public WxMpMaterialUploadResult materialNewsUpload(String appid, List<WxMpDraftArticles> articles) throws WxErrorException {
+    public WxMpMaterialUploadResult addDraft(String appid, List<WxMpDraftArticles> articles) throws WxErrorException {
         Assert.notEmpty(articles,"图文列表不得为空");
         log.info("上传图文素材...");
+        //  private Integer needOpenComment;
+        //  private Integer onlyFansCanComment;
+        //   private Integer showCoverPic;
         wxMpService.switchoverTo(appid);
-	WxMpAddDraft news = new WxMpAddDraft();
+        WxMpAddDraft news = new WxMpAddDraft();
         news.setArticles(articles);
         String draftMediaId = wxMpService.getDraftService().addDraft(news);
         WxMpMaterialUploadResult result = new WxMpMaterialUploadResult();
         result.setMediaId(draftMediaId);
         result.setErrCode(0);
-	return result;
+        return result;
+    }
+
+    @Override
+    @CacheEvict(allEntries = true)
+    public WxMpMaterialUploadResult materialNewsUpload(String appid, List<WxMpNewsArticle> articles) throws WxErrorException {
+        Assert.notEmpty(articles, "图文列表不得为空");
+        log.info("上传图文素材...");
+        wxMpService.switchoverTo(appid);
+        WxMpMaterialUploadResult result = null;
+        try {
+            WxMpMaterialNews wxMpMaterialNews = new WxMpMaterialNews();
+            wxMpMaterialNews.setArticles(articles);
+            WxMpMaterialUploadResult wxMpMaterialUploadResult = wxMpService.getMaterialService().materialNewsUpload(wxMpMaterialNews);
+            result = new WxMpMaterialUploadResult();
+            result.setMediaId(wxMpMaterialUploadResult.getMediaId());
+        } catch (WxErrorException e) {
+            e.printStackTrace();
+            System.out.println("materialNewsUpload 报错:{}"+e);
+        }
+        result.setErrCode(0);
+        return result;
     }
 
     /**
@@ -116,5 +146,47 @@ public class WxAssetsServiceImpl implements WxAssetsService {
         log.info("删除素材，mediaId={}",mediaId);
         wxMpService.switchoverTo(appid);
         return wxMpService.getMaterialService().materialDelete(mediaId);
+    }
+
+    @Override
+    @CacheEvict(allEntries = true)
+    public boolean draftDelete(String appid, String mediaId) throws WxErrorException {
+        log.info("删除素材，mediaId={}",mediaId);
+        wxMpService.switchoverTo(appid);
+        Boolean aBoolean = wxMpService.getDraftService().delDraft(mediaId);
+        return aBoolean;
+    }
+
+    @Override
+    public WxMpDraftList draftBatchGet(String appid,int offset, int count, int noContent) throws WxErrorException {
+        log.info("获取草稿列表,appid:{}",appid);
+        wxMpService.switchoverTo(appid);
+        WxMpDraftList wxMpDraftList = wxMpService.getDraftService().listDraft(offset, count, noContent);
+        return wxMpDraftList;
+    }
+
+    @Override
+    public String submitDraftList(String appid, String mediaId) throws WxErrorException {
+        log.info("草稿发布接口,appid:{}",appid);
+        wxMpService.switchoverTo(appid);
+        String submit = wxMpService.getFreePublishService().submit(mediaId);
+        return submit;
+    }
+
+
+    @Override
+    public WxMpFreePublishList getPublicationRecords(String appid,int offset, int count, int noContent) throws WxErrorException {
+        log.info("草稿发布接口,appid:{}",appid);
+        wxMpService.switchoverTo(appid);
+        WxMpFreePublishList publicationRecords = wxMpService.getFreePublishService().getPublicationRecords(offset, count, noContent);
+        return publicationRecords;
+    }
+
+    @Override
+    public Boolean deletePushAllArticle(String appid,String articleId) throws WxErrorException {
+        log.info("草稿发布接口,appid:{}",appid);
+        wxMpService.switchoverTo(appid);
+        Boolean aBoolean = wxMpService.getFreePublishService().deletePushAllArticle(articleId);
+        return aBoolean;
     }
 }
