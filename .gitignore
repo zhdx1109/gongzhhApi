@@ -2,7 +2,7 @@
 *.class
 *.iml
 .idea/
-target/
+#target/
 src/main/resources/static/
 .settings/
 .vscode/
@@ -19,7 +19,7 @@ src/main/resources/static/
 .mtj.tmp/
 
 # Package Files #
-*.jar
+#*.jar
 *.war
 *.nar
 *.ear
