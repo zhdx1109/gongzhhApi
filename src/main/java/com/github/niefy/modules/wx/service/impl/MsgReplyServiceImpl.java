@@ -57,6 +57,7 @@ public class MsgReplyServiceImpl implements MsgReplyService {
             if (rules.isEmpty()) {
                 return false;
             }
+            //todo 用于回复不在列表内的数据0612
             long delay = 0;
             for (MsgReplyRule rule : rules) {
                 TaskExcutor.schedule(() -> {
