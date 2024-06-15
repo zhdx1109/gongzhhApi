@@ -13,26 +13,28 @@ import java.util.Date;
 /**
  * @Author zhangdongxu
  * @Description create bean
- * @Date 2024/6/14 12:12
+ * @Date 2024/6/14 14:07
  * @Version 1.0
  */
 
 @Data
-@TableName("wx_task_info")
-public class WxTaskInfo   implements Serializable {
+@TableName("wx_task_reso_info")
+public class WxTaskResoInfo   implements Serializable {
     private static final long serialVersionUID = 1L;
     @TableId(type = IdType.AUTO)
-    private Integer taskId;
+    private Integer id;
     private String taskName;
-    private String taskUrlCode;
+    private String taskResoUrl;
+    private Integer taskId;
     @TableField(value = "`sync_used`")
-    private boolean syncUsed;
+    private Boolean syncUsed;
     @TableField(value = "`status`")
     private boolean status;
     private Date updateTime;
 
-    public WxTaskInfo() {
+    public WxTaskResoInfo() {
     }
+
     @Override
     public String toString() {
         return Json.toJsonString(this);

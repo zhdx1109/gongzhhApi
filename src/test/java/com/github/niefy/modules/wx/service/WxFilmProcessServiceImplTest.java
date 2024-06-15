@@ -1,7 +1,11 @@
 package com.github.niefy.modules.wx.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.niefy.modules.wx.dao.WxTaskInfoMapper;
+import com.github.niefy.modules.wx.dao.WxTaskResoInfoMapper;
 import com.github.niefy.modules.wx.entity.WxTaskInfo;
+import com.github.niefy.modules.wx.entity.WxTaskResoInfo;
 import com.github.niefy.modules.wx.service.impl.WxFilmProcessServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,11 +31,33 @@ public class WxFilmProcessServiceImplTest {
     @Autowired
     WxTaskInfoMapper wxTaskInfoMapper;
 
+    @Autowired
+    WxTaskResoInfoMapper wxTaskResoInfoMapper;
+
+
+
+    //此方法用于同步TaskResource 任务资源表
     @Test
-    void queryWxFilmProcess(){
-        wxFilmProcessService.filmResourceProcess();
+    void addTaskResourceProcessTest(){
+        wxFilmProcessService.addTaskResourceProcess();
     }
 
+    //此方法用于同步MsgReplyRule表
+    @Test
+    void addMsgReplyRuleProcessTest(){
+        wxFilmProcessService.addMsgReplyRuleProcess();
+    }
+
+
+    @Test
+    void queryTasksResourceProcessTest(){
+//        WxTaskResoInfo wxTaskResoInfo = wxTaskResoInfoMapper.selectOne(new QueryWrapper<WxTaskResoInfo>().eq("task_name", "影url"));
+        WxTaskResoInfo wxTaskResoInfo1 = wxTaskResoInfoMapper.selectOne(new LambdaQueryWrapper<WxTaskResoInfo>().eq(WxTaskResoInfo::getTaskName,"影url"));
+        System.out.println(wxTaskResoInfo1);
+    }
+
+
+    //此方法用于将xx秘钥url.xlsx进行同步数据表:task_info表
     @Test
     void insertWxTaskInfoTest(){
         //读取C:\Users\zhangdongxu\Desktop\公众号开发\任务列表\XXX秘钥url.xlsx
@@ -62,9 +88,9 @@ public class WxFilmProcessServiceImplTest {
                 String cellBValue = getCellValue(cellB);
                 WxTaskInfo wxTaskInfo = new WxTaskInfo();
                 wxTaskInfo.setTaskName(cellAValue);
-                wxTaskInfo.setTaskUrl(cellBValue);
-                wxTaskInfo.setIsUsed("0");
-                wxTaskInfo.setStatus("1");
+                wxTaskInfo.setTaskUrlCode(cellBValue);
+                wxTaskInfo.setSyncUsed(false);
+                wxTaskInfo.setStatus(true);
                 wxTaskInfo.setUpdateTime(new Date());
                 try {
                     wxTaskInfoMapper.insert(wxTaskInfo);
