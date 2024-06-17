@@ -13,6 +13,6 @@ import java.util.List;
  */
 public interface WxFilmService {
     //获取列表
-    List<WxFilmInfo>queryFilmList();
+    List<WxFilmInfo>queryFilmList(List<String> syncStatus);
 
 }

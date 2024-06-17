@@ -39,6 +39,7 @@ public class MsgReplyRule implements Serializable {
     private Time effectTimeStart;
     private Time effectTimeEnd;
     private int priority;
+    private Integer parentId;
     private Date updateTime;
 
     @Override

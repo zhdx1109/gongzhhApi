@@ -29,6 +29,8 @@ public class WxFilmInfo  implements Serializable {
     private String isFollowUp;
     private String followUpValue;
     private String startValue;
+    private String syncStatus;
+    private String syncValue;
     private int filmCount;
     private Date updateTime;
     public WxFilmInfo() {

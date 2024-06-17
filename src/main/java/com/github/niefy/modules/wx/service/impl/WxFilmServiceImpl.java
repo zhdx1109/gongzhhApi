@@ -1,5 +1,6 @@
 package com.github.niefy.modules.wx.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.conditions.query.QueryChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -24,8 +25,9 @@ public class WxFilmServiceImpl extends ServiceImpl<WxFilmInfoMapper, WxFilmInfo>
     WxFilmInfoMapper wxFilmInfoMapper;
 
     @Override
-    public List<WxFilmInfo> queryFilmList() {
-        List<WxFilmInfo> wxFilmInfoList = wxFilmInfoMapper.selectList(new QueryWrapper<WxFilmInfo>().orderByDesc("update_time"));
+    public List<WxFilmInfo> queryFilmList(List<String> syncStatus) {
+        List<WxFilmInfo> wxFilmInfoList = wxFilmInfoMapper.selectList(new LambdaQueryWrapper<WxFilmInfo>().in(WxFilmInfo::getSyncStatus,syncStatus)
+                .orderByDesc(WxFilmInfo::getUpdateTime));
         return wxFilmInfoList;
     }
 }

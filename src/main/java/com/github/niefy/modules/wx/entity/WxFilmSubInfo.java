@@ -21,7 +21,7 @@ import java.util.Date;
 public class WxFilmSubInfo implements Serializable {
     private static final long serialVersionUID = 1L;
     @TableId(type = IdType.AUTO)
-    private Long filmSubId;
+    private Integer filmSubId;
     private String filmName;
     private String filmNameDec;
     private String seriesValue;
