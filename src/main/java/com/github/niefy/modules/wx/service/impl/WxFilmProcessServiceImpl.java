@@ -8,6 +8,7 @@ import com.github.niefy.modules.wx.dao.WxFilmInfoMapper;
 import com.github.niefy.modules.wx.dao.WxTaskInfoMapper;
 import com.github.niefy.modules.wx.dao.WxTaskResoInfoMapper;
 import com.github.niefy.modules.wx.entity.*;
+import com.github.niefy.modules.wx.enums.FilmTypeEnum;
 import com.github.niefy.modules.wx.service.WxFilmService;
 import com.github.niefy.modules.wx.service.WxFilmSubService;
 import com.sun.org.apache.bcel.internal.generic.ARETURN;
@@ -80,7 +81,7 @@ public class WxFilmProcessServiceImpl {
                     wxTaskResoInfo.setSyncUsed(false);
                     wxTaskResoInfo.setParentId(x.getFilmId());
                     WxTaskResoInfo wxTaskResoInfo1 = wxTaskResoInfoMapper.selectOne(new LambdaQueryWrapper<WxTaskResoInfo>().eq(WxTaskResoInfo::getTaskName, strCurrURL));
-                    if (null==wxTaskResoInfo1){
+                    if (null == wxTaskResoInfo1) {
                         wxTaskResoInfoMapper.insert(wxTaskResoInfo);
                         finalGetTaskNameList.add(filmNameDec);
                     }
@@ -98,9 +99,9 @@ public class WxFilmProcessServiceImpl {
         ConcurrentMap<Integer, WxFilmInfo> keyWxFilmInfoMap = wxFilmInfoList.stream().filter(x -> !"1".equalsIgnoreCase(x.getIsSingle())).collect(Collectors.toConcurrentMap(WxFilmInfo::getFilmId, Function.identity()));
         //将其取出需要的ids
 //        List<Integer> collect = wxFilmInfoList.stream().map(WxFilmInfo::getFilmId).collect(Collectors.toList());
-            if (null==keyWxFilmInfoMap||keyWxFilmInfoMap.size()==0){
-                return ;
-            }
+        if (null == keyWxFilmInfoMap || keyWxFilmInfoMap.size() == 0) {
+            return;
+        }
         List<Integer> collect = Arrays.asList(keyWxFilmInfoMap.keySet().toArray(new Integer[0]));
 
         List<WxFilmSubInfo> wxFilmSubInfos = wxFilmSubService.querySubList(collect);
@@ -113,7 +114,9 @@ public class WxFilmProcessServiceImpl {
 //        collect2.keySet().forEach(key->collect2.computeIfPresent(key,(k,v)->v.stream().sorted(Comparator.comparing(WxFilmSubInfo::getPriority)).collect(Collectors.toList())));
 //        System.out.println("先分组后排序:"+Json.toJsonString(collect2));
 
-        if (null==collect1||collect1.size()==0){return;}
+        if (null == collect1 || collect1.size() == 0) {
+            return;
+        }
 
         Integer[] integers = keyWxFilmInfoMap.keySet().toArray(new Integer[0]);
 
@@ -149,18 +152,18 @@ public class WxFilmProcessServiceImpl {
                         String strRes = finalFilmNameDec + "-" + String.valueOf(numbersList.get(j));//1-1
                         String strCurr = finalFilmName + strRes; //斯巴达1-1  关键字
                         strCurrURL = strCurr + "url";//斯巴达1-1url
-                        extracted(finalGetTaskNameList, wxFilmInfo, strCurrURL, strCurrURL, followUpValue, strRes,wxFilmSubInfo);
+                        extracted(finalGetTaskNameList, wxFilmInfo, strCurrURL, strCurrURL, followUpValue, strRes, wxFilmSubInfo);
                     }
                 } else {
                     strCurrURL = filmNameDec + "url";
-                    extracted(finalGetTaskNameList, wxFilmInfo, strCurrURL, filmNameDec, followUpValue, seriesValue,wxFilmSubInfo);
+                    extracted(finalGetTaskNameList, wxFilmInfo, strCurrURL, filmNameDec, followUpValue, seriesValue, wxFilmSubInfo);
                 }
             }
         }
 
     }
 
-    private void extracted(List<String> finalGetTaskNameList, WxFilmInfo wxFilmInfo, String strCurrURL, String filmNameDec, String followUpValue, String strRes,WxFilmSubInfo wxFilmSubInfo) {
+    private void extracted(List<String> finalGetTaskNameList, WxFilmInfo wxFilmInfo, String strCurrURL, String filmNameDec, String followUpValue, String strRes, WxFilmSubInfo wxFilmSubInfo) {
         if (null != finalGetTaskNameList && finalGetTaskNameList.size() > 0) {
             if (!finalGetTaskNameList.contains(strCurrURL)) {
                 WxTaskResoInfo wxTaskResoInfo = new WxTaskResoInfo();
@@ -170,7 +173,7 @@ public class WxFilmProcessServiceImpl {
                 wxTaskResoInfo.setSyncUsed(false);
                 wxTaskResoInfo.setParentId(wxFilmSubInfo.getFilmSubId());
                 WxTaskResoInfo wxTaskResoInfo1 = wxTaskResoInfoMapper.selectOne(new LambdaQueryWrapper<WxTaskResoInfo>().eq(WxTaskResoInfo::getTaskName, strCurrURL));
-                if (null==wxTaskResoInfo1){
+                if (null == wxTaskResoInfo1) {
                     wxTaskResoInfoMapper.insert(wxTaskResoInfo);
                     finalGetTaskNameList.add(strCurrURL);
                 }
@@ -207,8 +210,8 @@ public class WxFilmProcessServiceImpl {
         ConcurrentMap<Integer, WxFilmInfo> keyWxFilmInfoMap = wxFilmInfoList.stream().filter(x -> !"1".equalsIgnoreCase(x.getIsSingle())).collect(Collectors.toConcurrentMap(WxFilmInfo::getFilmId, Function.identity()));
         //将其取出需要的ids
 //        List<Integer> collect = wxFilmInfoList.stream().map(WxFilmInfo::getFilmId).collect(Collectors.toList());
-        if (null==keyWxFilmInfoMap||keyWxFilmInfoMap.size()==0){
-            return ;
+        if (null == keyWxFilmInfoMap || keyWxFilmInfoMap.size() == 0) {
+            return;
         }
         List<Integer> collect = Arrays.asList(keyWxFilmInfoMap.keySet().toArray(new Integer[0]));
 
@@ -221,7 +224,9 @@ public class WxFilmProcessServiceImpl {
 //        Map<Integer, List<WxFilmSubInfo>> collect2 = wxFilmSubInfos.stream().collect(Collectors.groupingBy(x -> x.getParentId()));
 //        collect2.keySet().forEach(key->collect2.computeIfPresent(key,(k,v)->v.stream().sorted(Comparator.comparing(WxFilmSubInfo::getPriority)).collect(Collectors.toList())));
 //        System.out.println("先分组后排序:"+Json.toJsonString(collect2));
-        if (null==collect1||collect1.size()==0){return;}
+        if (null == collect1 || collect1.size() == 0) {
+            return;
+        }
         Integer[] integers = keyWxFilmInfoMap.keySet().toArray(new Integer[0]);
 
         Integer[] keys = collect1.keySet().toArray(new Integer[0]);
@@ -460,21 +465,145 @@ public class WxFilmProcessServiceImpl {
         }
     }
 
+    //根据当前资源类目生成
+    public void addCategoryProcessor() {
+        List<String> strings = Arrays.asList("1", "2", "3");
+        List<WxFilmInfo> wxFilmInfoList = wxFilmService.queryFilmInfoListForCategory(strings, "4");
+        if (null == wxFilmInfoList || wxFilmInfoList.size() == 0) {
+            return;
+        }
+
+        //根据类目进行过滤
+        Map<Integer, List<WxFilmInfo>> collectAllMap = wxFilmInfoList.stream().sorted(Comparator.comparing(WxFilmInfo::getUpdateTime)).collect(Collectors.groupingBy(WxFilmInfo::getFilmType));
+        if (null == collectAllMap || collectAllMap.size() == 0) {
+            return;
+        }
+        //获取分组好的影视资源
+        Integer[] filmTypeLists = collectAllMap.keySet().toArray(new Integer[0]);
+        for (int i = 0; i < filmTypeLists.length; i++) {
+            Integer filmType = filmTypeLists[i];
+            List<WxFilmInfo> wxFilmTypeList = collectAllMap.get(filmType);
+            if (null == wxFilmTypeList || collectAllMap.size() == 0) {
+                continue;
+            }
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            //电影类目
+            int filmType1Size = wxFilmTypeList.size();
+            String ruleName = "";
+            String matchValueForFilm1 = "";
+            String content1 = "";
+
+            String valueByCode = FilmTypeEnum.getValueByCode(String.valueOf(filmType));
+
+            ruleName = valueByCode + "类目";
+            matchValueForFilm1 = valueByCode + "类目," + valueByCode + "," + valueByCode + "列表,全部" + valueByCode;
+            content1 = valueByCode+"(共" + filmType1Size + "部)";
 
 
+            boolean isSave = false;
+            String strFilm1A = "";
+            int quotient = filmType1Size / 3;//整数部分
+            int remainder = filmType1Size % 3; //余数部分
+            int k1 = 1;
+            String more = "";
+            for (int j = 1; j <= filmType1Size; j++) {//从1 开始 执行到 相等 12345  size =5
+                WxFilmInfo x = wxFilmTypeList.get(j - 1);
+                strFilm1A = strFilm1A + +j + ": <a href=\"weixin://bizmsgmenu?msgmenucontent=" + x.getFilmName() + "&msgmenuid=1\">" + x.getFilmName() + "</a> \n";
+
+                if (filmType1Size > 2) {
+                    if (j == 2) {
+                        //第一次存:电影类目->记录一个总的 第一次只展示5个
+                        isSave = true;
+                    } else {
+                        //更多次存:(更多电影) 展示10个 测试展示 3个
+                        if ((j / 3) == k1 && (j % 3) == 0) {
+                            ruleName = "更多"+valueByCode;//更多电影0
+                            matchValueForFilm1 = ruleName + (k1 - 1);//需要请空掉strFilm1A
+                            String nextMore = ruleName + k1;
+                            MsgReplyRule msgreplyRule = new MsgReplyRule();
+                            msgreplyRule.setRuleName(ruleName);
+                            msgreplyRule.setMatchValue(matchValueForFilm1);
+                            msgreplyRule.setExactMatch(true);
+                            msgreplyRule.setReplyType("text");
+                            if (j != filmType1Size) {
+                                more = "\n <a href=\"weixin://bizmsgmenu?msgmenucontent=" + nextMore + "&msgmenuid=1\">" + ruleName + "</a> \n";
+                            }
+                            msgreplyRule.setReplyContent(content1 + "\n" + strFilm1A + more);
+                            msgreplyRule.setStatus(true);
+                            msgreplyRule.setCategoryType("1");
+                            Date date = new Date();
+                            String format = sdf.format(date);
+                            msgreplyRule.setDesc(format + ":auto-1");
+                            msgreplyRule.setUpdateTime(date);
+                            msgReplyRuleMapper.insert(msgreplyRule);
+                            strFilm1A = "";
+                            k1 = k1 + 1;
+
+                        } else if ((k1 - 1) == quotient && j == filmType1Size && remainder > 0) {
+                            ruleName = "更多"+valueByCode;//更多电影0
+                            matchValueForFilm1 = ruleName + (k1 - 1);//需要请空掉strFilm1A
+                            MsgReplyRule msgreplyRule = new MsgReplyRule();
+                            msgreplyRule.setRuleName(ruleName);
+                            msgreplyRule.setMatchValue(matchValueForFilm1);
+                            msgreplyRule.setExactMatch(true);
+                            msgreplyRule.setReplyType("text");
+                            msgreplyRule.setReplyContent(content1 + "\n" + strFilm1A);
+                            msgreplyRule.setStatus(true);
+                            msgreplyRule.setCategoryType("1");
+                            Date date = new Date();
+                            String format = sdf.format(date);
+                            msgreplyRule.setDesc(format + ":auto-1");
+                            msgreplyRule.setUpdateTime(date);
+                            msgReplyRuleMapper.insert(msgreplyRule);
+                        }
+
+                    }
+                } else {
+                    //少于5个 就直接存储
+                    if (j == filmType1Size) {
+                        isSave = true;
+                    }
+                }
+
+                if (isSave) {
+                    MsgReplyRule msgreplyRule = new MsgReplyRule();
+                    msgreplyRule.setRuleName(ruleName);
+                    msgreplyRule.setMatchValue(matchValueForFilm1);
+                    msgreplyRule.setExactMatch(true);
+                    msgreplyRule.setReplyType("text");
+
+                    if (filmType1Size > 2) {
+                        more = "\n<a href=\"weixin://bizmsgmenu?msgmenucontent=更多"+valueByCode+"0" + "&msgmenuid=1\">更多"+valueByCode+"" + "</a> \n";
+                    }
+                    msgreplyRule.setReplyContent(content1 + "\n" + strFilm1A + more);
+                    msgreplyRule.setStatus(true);
+                    msgreplyRule.setCategoryType("1");
+                    Date date = new Date();
+                    String format = sdf.format(date);
+                    msgreplyRule.setDesc(format + ":auto-1");
+                    msgreplyRule.setUpdateTime(date);
+                    msgReplyRuleMapper.insert(msgreplyRule);
+                    more = "";
+                    isSave = false;
+
+                }
+
+            }
+
+        }
 
 
+    }
 
-    public void delFilmResources(Integer filmId,String filmName) {
-    //删除逻辑:
+
+    public void delFilmResources(Integer filmId, String filmName) {
+        //删除逻辑:
         //验证 是否存在该film 信息
         WxFilmInfo wxFilmInfo = wxFilmInfoMapper.selectOne(new LambdaQueryWrapper<WxFilmInfo>().eq(WxFilmInfo::getFilmId, filmId).eq(WxFilmInfo::getFilmName, filmName));
-        if (null==wxFilmInfo){
+        if (null == wxFilmInfo) {
             System.out.println("无此删除信息");
             return;
         }
         //获取判断是
-
-
     }
 }

@@ -56,6 +56,14 @@ public class WxFilmProcessServiceImplTest {
         System.out.println(wxTaskResoInfo1);
     }
 
+    @Test
+    void addCategoryProcessorTest(){
+        wxFilmProcessService.addCategoryProcessor();
+    }
+
+
+
+
 
     //此方法用于将xx秘钥url.xlsx进行同步数据表:task_info表
     @Test

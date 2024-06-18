@@ -40,6 +40,7 @@ public class MsgReplyRule implements Serializable {
     private Time effectTimeEnd;
     private int priority;
     private Integer parentId;
+    private String categoryType;
     private Date updateTime;
 
     @Override

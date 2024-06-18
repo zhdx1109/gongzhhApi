@@ -24,6 +24,7 @@ public class WxFilmInfo  implements Serializable {
     @TableId(type = IdType.AUTO)
     private Integer filmId;
     private String filmName;
+    private Integer filmType;
     private String filmNameDec;
     private String isSingle;
     private String isFollowUp;
