@@ -198,7 +198,7 @@ public class WxFilmProcessServiceImpl {
             String filmNameDec = x.getFilmNameDec();
             String strCurrMY = filmNameDec + "秘钥";//影秘钥
             String strCurrURL = filmNameDec + "url";//影url
-            syncTable(filmNameDec, strCurrMY, strCurrURL, null, null, x.getFilmId(), parentIdNoECount, null, true);
+            syncTable(filmNameDec, strCurrMY, strCurrURL, null, null, x.getFilmId(), parentIdNoECount, null, true,x.getFilmId());
             //更新film 状态为4
             if (!parentIdNoECount.containsKey(x.getFilmId())) {
                 updateFilmStatus(x, "4");
@@ -234,6 +234,7 @@ public class WxFilmProcessServiceImpl {
             List<WxFilmSubInfo> wxFilmSubInfos1 = collect1.get(key);
             Integer integer = integers[c];
             WxFilmInfo wxFilmInfo = keyWxFilmInfoMap.get(integer);
+            Integer filmId = wxFilmInfo.getFilmId();
 
             String strCurrURL = "";
 
@@ -268,7 +269,7 @@ public class WxFilmProcessServiceImpl {
                             Integer nextInt = numbersList.get(m + 1);
                             String strNext = finalFilmName + finalFilmNameDec + "-" + String.valueOf(nextInt);
                             String strNextA = "<a href=\"weixin://bizmsgmenu?msgmenucontent=" + strNext + "&msgmenuid=1\">" + strNext + "</a>";
-                            syncTable(strCurr, strCurrMY, strCurrURL, null, strNextA, filmSubId, parentIdNoECount, j + 1, false);
+                            syncTable(strCurr, strCurrMY, strCurrURL, null, strNextA, filmSubId, parentIdNoECount, j + 1, false,filmId);
 
                         } else if (!followUpValue.equalsIgnoreCase(strRes)) {
                             int m = j;
@@ -294,14 +295,14 @@ public class WxFilmProcessServiceImpl {
                             }
                             String strPreA = "<a href=\"weixin://bizmsgmenu?msgmenucontent=" + strPre + "&msgmenuid=1\">" + strPre + "</a>";
                             String strNextA = "<a href=\"weixin://bizmsgmenu?msgmenucontent=" + strNext + "&msgmenuid=1\">" + strNext + "</a>";
-                            syncTable(strCurr, strCurrMY, strCurrURL, strPreA, strNextA, filmSubId, parentIdNoECount, j + 1, false);
+                            syncTable(strCurr, strCurrMY, strCurrURL, strPreA, strNextA, filmSubId, parentIdNoECount, j + 1, false,filmId);
 
                         } else {
                             int m = j;
                             String strPre = finalFilmName + finalFilmNameDec + "-" + String.valueOf(numbersList.get(m - 1));
                             String strPreA = "<a href=\"weixin://bizmsgmenu?msgmenucontent=" + strPre + "&msgmenuid=1\">" + strPre + "</a>";
-                            syncTable(strCurr, strCurrMY, strCurrURL, strPreA, null, filmSubId, parentIdNoECount, j + 1, false);
-                            if (!parentIdNoECount.containsKey(filmSubId)) {
+                            syncTable(strCurr, strCurrMY, strCurrURL, strPreA, null, filmSubId, parentIdNoECount, j + 1, false,filmId);
+                            if (!parentIdNoECount.containsKey(filmId)) {
                                 updateFilmStatus(wxFilmInfo, "4");
                             }
                         }
@@ -314,18 +315,18 @@ public class WxFilmProcessServiceImpl {
                         WxFilmSubInfo wxFilmSubNextInfo = wxFilmSubInfos1.get(i + 1);
                         String strNext = wxFilmSubNextInfo.getFilmNameDec();
                         String strNextA = "<a href=\"weixin://bizmsgmenu?msgmenucontent=" + strNext + "&msgmenuid=1\">" + strNext + "</a>";
-                        syncTable(filmNameDec, strCurrMY, strCurrURL, null, strNextA, filmSubId, parentIdNoECount, i + 1, false);
+                        syncTable(filmNameDec, strCurrMY, strCurrURL, null, strNextA, filmSubId, parentIdNoECount, i + 1, false,filmId);
                     } else if (!followUpValue.equalsIgnoreCase(seriesValue)) {
                         String strPre = wxFilmSubInfos1.get(i - 1).getFilmNameDec();
                         String strNext = wxFilmSubInfos1.get(i + 1).getFilmNameDec();
                         String strPreA = "<a href=\"weixin://bizmsgmenu?msgmenucontent=" + strPre + "&msgmenuid=1\">" + strPre + "</a>";
                         String strNextA = "<a href=\"weixin://bizmsgmenu?msgmenucontent=" + strNext + "&msgmenuid=1\">" + strNext + "</a>";
-                        syncTable(filmNameDec, strCurrMY, strCurrURL, strPreA, strNextA, filmSubId, parentIdNoECount, i + 1, false);
+                        syncTable(filmNameDec, strCurrMY, strCurrURL, strPreA, strNextA, filmSubId, parentIdNoECount, i + 1, false,filmId);
                     } else {
                         String strPre = wxFilmSubInfos1.get(i - 1).getFilmNameDec();
                         String strPreA = "<a href=\"weixin://bizmsgmenu?msgmenucontent=" + strPre + "&msgmenuid=1\">" + strPre + "</a>";
-                        syncTable(filmNameDec, strCurrMY, strCurrURL, strPreA, null, filmSubId, parentIdNoECount, i + 1, false);
-                        if (!parentIdNoECount.containsKey(filmSubId)) {
+                        syncTable(filmNameDec, strCurrMY, strCurrURL, strPreA, null, filmSubId, parentIdNoECount, i + 1, false,filmId);
+                        if (!parentIdNoECount.containsKey(filmId)) {
                             updateFilmStatus(wxFilmInfo, "4");
                         }
                     }
@@ -333,7 +334,10 @@ public class WxFilmProcessServiceImpl {
             }
         }
         if (null != parentIdNoECount && parentIdNoECount.size() > 0) {
+
             for (WxFilmInfo wx : wxFilmInfoList) {
+                boolean b = parentIdNoECount.containsKey(wx.getFilmId());
+                System.out.println(b);
                 if (parentIdNoECount.containsKey(wx.getFilmId())) {
                     String s = parentIdNoECount.get(wx.getFilmId());
                     wx.setSyncValue(s);
@@ -364,7 +368,7 @@ public class WxFilmProcessServiceImpl {
      * @param strNextA    下一个
      *                    Integer priority    用于记录当前影视 秘钥 url 的顺序
      */
-    public void syncTable(String filmNameDec, String strCurrMY, String strCurrURL, String strPreA, String strNextA, Integer key, Map<Integer, String> parentIdNoECount, Integer priority, boolean parentIdFromP) {
+    public void syncTable(String filmNameDec, String strCurrMY, String strCurrURL, String strPreA, String strNextA, Integer key, Map<Integer, String> parentIdNoECount, Integer priority, boolean parentIdFromP,Integer filmId) {
 
         try {
             WxTaskResoInfo wxTaskResoInfo = wxTaskResoInfoMapper.selectOne(new LambdaQueryWrapper<WxTaskResoInfo>().eq(WxTaskResoInfo::getTaskName, strCurrURL));
@@ -453,16 +457,16 @@ public class WxFilmProcessServiceImpl {
 
             } else {
                 //只要存在 key获取到的reso_code 为空,需要将 film sync_status 状态修改为2 记录一下当前的 strCurrURL
-                if (null != key) {
-                    String s1 = parentIdNoECount.get(key);
+                if (null != filmId) {
+                    String s1 = parentIdNoECount.get(filmId);
                     if (null == s1) {
-                        parentIdNoECount.put(key, strCurrURL + "&" + 1);
+                        parentIdNoECount.put(filmId, strCurrURL + "&" + 1);
                     } else {
                         String[] split = s1.split("&");
                         int i = Integer.parseInt(split[1]);
                         i = i + 1;
                         s1 = split[0] + "&" + i;
-                        parentIdNoECount.put(key, s1);
+                        parentIdNoECount.put(filmId, s1);
                     }
                 }
             }
@@ -540,6 +544,10 @@ public class WxFilmProcessServiceImpl {
                             String format = sdf.format(date);
                             msgreplyRule.setDesc(format + ":auto-" + filmType);
                             msgreplyRule.setUpdateTime(date);
+                            MsgReplyRule msgReplyRule = msgReplyRuleMapper.selectOne(new LambdaQueryWrapper<MsgReplyRule>().eq(MsgReplyRule::getMatchValue, matchValueForFilm1));
+                            if (null != msgReplyRule){
+                                msgReplyRuleMapper.deleteById(msgReplyRule);
+                            }
                             msgReplyRuleMapper.insert(msgreplyRule);
                             strFilm1A = "";
                             k1 = k1 + 1;
@@ -559,6 +567,10 @@ public class WxFilmProcessServiceImpl {
                             String format = sdf.format(date);
                             msgreplyRule.setDesc(format + ":auto-" + filmType);
                             msgreplyRule.setUpdateTime(date);
+                            MsgReplyRule msgReplyRule = msgReplyRuleMapper.selectOne(new LambdaQueryWrapper<MsgReplyRule>().eq(MsgReplyRule::getMatchValue, matchValueForFilm1));
+                            if (null != msgReplyRule){
+                                msgReplyRuleMapper.deleteById(msgReplyRule);
+                            }
                             msgReplyRuleMapper.insert(msgreplyRule);
                         }
 
@@ -587,12 +599,17 @@ public class WxFilmProcessServiceImpl {
                     String format = sdf.format(date);
                     msgreplyRule.setDesc(format + ":auto-" + filmType);
                     msgreplyRule.setUpdateTime(date);
+                    MsgReplyRule msgReplyRule = msgReplyRuleMapper.selectOne(new LambdaQueryWrapper<MsgReplyRule>().eq(MsgReplyRule::getMatchValue, matchValueForFilm1));
+                    if (null != msgReplyRule){
+                        msgReplyRuleMapper.deleteById(msgReplyRule);
+                    }
                     msgReplyRuleMapper.insert(msgreplyRule);
                     more = "";
                     isSave = false;
 
                 }
-
+                //添加subfilm 目录
+                addSubCategoryList(x);
             }
 
         }
@@ -614,6 +631,7 @@ public class WxFilmProcessServiceImpl {
         Integer filmType = wxFilmInfo.getFilmType();//电影类型
         //非单独作品:判断 is_follow_up 是否为0 (非电视剧类)  is_follow_up =1(电视剧类)
         String isFollowUp = wxFilmInfo.getIsFollowUp();
+        Integer filmId = wxFilmInfo.getFilmId();
         List<WxFilmSubInfo> wxFilmSubInfos = wxFilmSubInfoMapper.selectList(new LambdaQueryWrapper<WxFilmSubInfo>().eq(WxFilmSubInfo::getParentId, wxFilmInfo.getFilmId()));
         if (null == wxFilmSubInfos || wxFilmSubInfos.size() == 0) {
             return;
@@ -650,7 +668,7 @@ public class WxFilmProcessServiceImpl {
             boolean isSave = false;
             int k1Sub = 1;
             String moreSub = "";
-            extractedReplyRuleCategoryList(filmName, filmType, sdf, comparingByPriority, ruleName, matchValue, strFilm1A, size, contentPre, quotientSub, remainderSub, isSave, k1Sub, moreSub);
+            extractedReplyRuleCategoryList(filmName, filmType, sdf, comparingByPriority, ruleName, matchValue, strFilm1A, size, contentPre, quotientSub, remainderSub, isSave, k1Sub, moreSub,filmId);
 
         } else if ("1".equalsIgnoreCase(isFollowUp)) {
             int subInfoSize = wxFilmSubInfos.size();
@@ -720,6 +738,8 @@ public class WxFilmProcessServiceImpl {
                                 String format = sdf.format(date);
                                 msgreplyRule.setDesc(format + ":auto-" + filmType);
                                 msgreplyRule.setUpdateTime(date);
+                                msgreplyRule.setParentIdFromP(true);
+                                msgreplyRule.setParentId(filmId);
                                 MsgReplyRule msgReplyRule1 = msgReplyRuleMapper.selectOne(new LambdaQueryWrapper<MsgReplyRule>().eq(MsgReplyRule::getMatchValue, matchValue));
                                 if (null != msgReplyRule1) {
                                     msgReplyRuleMapper.deleteById(msgReplyRule1);
@@ -743,6 +763,8 @@ public class WxFilmProcessServiceImpl {
                                 String format = sdf.format(date);
                                 msgreplyRule.setDesc(format + ":auto-" + filmType);
                                 msgreplyRule.setUpdateTime(date);
+                                msgreplyRule.setParentIdFromP(true);
+                                msgreplyRule.setParentId(filmId);
                                 MsgReplyRule msgReplyRule1 = msgReplyRuleMapper.selectOne(new LambdaQueryWrapper<MsgReplyRule>().eq(MsgReplyRule::getMatchValue, matchValue));
                                 if (null != msgReplyRule1) {
                                     msgReplyRuleMapper.deleteById(msgReplyRule1);
@@ -773,6 +795,8 @@ public class WxFilmProcessServiceImpl {
                         String format = sdf.format(date);
                         msgreplyRule.setDesc(format + ":auto-" + filmType);
                         msgreplyRule.setUpdateTime(date);
+                        msgreplyRule.setParentIdFromP(true);
+                        msgreplyRule.setParentId(filmId);
                         MsgReplyRule msgReplyRule1 = msgReplyRuleMapper.selectOne(new LambdaQueryWrapper<MsgReplyRule>().eq(MsgReplyRule::getMatchValue, matchValue));
                         if (null != msgReplyRule1) {
                             msgReplyRuleMapper.deleteById(msgReplyRule1);
@@ -798,6 +822,8 @@ public class WxFilmProcessServiceImpl {
                     String format = sdf.format(date);
                     msgreplyRule.setDesc(format + ":auto-" + filmType);
                     msgreplyRule.setUpdateTime(date);
+                    msgreplyRule.setParentIdFromP(true);
+                    msgreplyRule.setParentId(filmId);
                     MsgReplyRule msgReplyRule1 = msgReplyRuleMapper.selectOne(new LambdaQueryWrapper<MsgReplyRule>().eq(MsgReplyRule::getMatchValue, matchValue));
                     if (null != msgReplyRule1) {
                         msgReplyRuleMapper.deleteById(msgReplyRule1);
@@ -814,7 +840,7 @@ public class WxFilmProcessServiceImpl {
 
     }
 
-    private void extractedReplyRuleCategoryList(String filmName, Integer filmType, SimpleDateFormat sdf, List<MsgReplyRule> comparingByPriority, String ruleName, String matchValue, String strFilm1A, int size, String contentPre, int quotientSub, int remainderSub, boolean isSave, int k1Sub, String moreSub) {
+    private void extractedReplyRuleCategoryList(String filmName, Integer filmType, SimpleDateFormat sdf, List<MsgReplyRule> comparingByPriority, String ruleName, String matchValue, String strFilm1A, int size, String contentPre, int quotientSub, int remainderSub, boolean isSave, int k1Sub, String moreSub,Integer filmId) {
         for (int j = 1; j <= size; j++) {
             MsgReplyRule msgReplyRule = comparingByPriority.get(j - 1);
             strFilm1A = strFilm1A + +j + ": <a href=\"weixin://bizmsgmenu?msgmenucontent=" + msgReplyRule.getMatchValue() + "&msgmenuid=1\">" + msgReplyRule.getMatchValue() + "</a> \n";
@@ -842,6 +868,8 @@ public class WxFilmProcessServiceImpl {
                         String format = sdf.format(date);
                         msgreplyRule.setDesc(format + ":auto-" + filmType);
                         msgreplyRule.setUpdateTime(date);
+                        msgreplyRule.setParentIdFromP(true);
+                        msgreplyRule.setParentId(filmId);
                         MsgReplyRule msgReplyRule1 = msgReplyRuleMapper.selectOne(new LambdaQueryWrapper<MsgReplyRule>().eq(MsgReplyRule::getMatchValue, matchValue));
                         if (null != msgReplyRule1) {
                             msgReplyRuleMapper.deleteById(msgReplyRule1);
@@ -864,6 +892,8 @@ public class WxFilmProcessServiceImpl {
                         String format = sdf.format(date);
                         msgreplyRule.setDesc(format + ":auto-" + filmType);
                         msgreplyRule.setUpdateTime(date);
+                        msgreplyRule.setParentIdFromP(true);
+                        msgreplyRule.setParentId(filmId);
                         MsgReplyRule msgReplyRule1 = msgReplyRuleMapper.selectOne(new LambdaQueryWrapper<MsgReplyRule>().eq(MsgReplyRule::getMatchValue, matchValue));
                         if (null != msgReplyRule1) {
                             msgReplyRuleMapper.deleteById(msgReplyRule1);
@@ -893,6 +923,8 @@ public class WxFilmProcessServiceImpl {
                 String format = sdf.format(date);
                 msgreplyRule.setDesc(format + ":auto-" + filmType);
                 msgreplyRule.setUpdateTime(date);
+                msgreplyRule.setParentIdFromP(true);
+                msgreplyRule.setParentId(filmId);
                 MsgReplyRule msgReplyRule1 = msgReplyRuleMapper.selectOne(new LambdaQueryWrapper<MsgReplyRule>().eq(MsgReplyRule::getMatchValue, matchValue));
                 if (null != msgReplyRule1) {
                     msgReplyRuleMapper.deleteById(msgReplyRule1);

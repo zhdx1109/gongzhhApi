@@ -51,6 +51,7 @@ public class WxFilmProcessServiceImplTest {
 
 
 
+    //此方法用于生成资源目录
     @Test
     void addCategoryProcessorTest(){
         wxFilmProcessService.addCategoryProcessor();
@@ -73,7 +74,17 @@ public class WxFilmProcessServiceImplTest {
         wxFilmInfo1.setIsFollowUp("1");
         wxFilmInfo1.setFilmName("斯巴达克斯");
         wxFilmInfo1.setFilmType(2);
-        wxFilmProcessService.addSubCategoryList(wxFilmInfo1);
+//        wxFilmProcessService.addSubCategoryList(wxFilmInfo1);
+
+
+        WxFilmInfo wxFilmInfo2 =new WxFilmInfo();
+        wxFilmInfo2.setFilmId(1);
+        wxFilmInfo2.setFilmName("漫威电影");
+        wxFilmInfo2.setFilmNameDec("漫威系列电影共31部");
+        wxFilmInfo2.setIsFollowUp("0");
+        wxFilmInfo2.setIsSingle("0");
+        wxFilmInfo2.setFilmType(1);
+        wxFilmProcessService.addSubCategoryList(wxFilmInfo2);
 
     }
 
