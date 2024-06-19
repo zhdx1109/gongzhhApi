@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.niefy.modules.wx.dao.WxTaskInfoMapper;
 import com.github.niefy.modules.wx.dao.WxTaskResoInfoMapper;
+import com.github.niefy.modules.wx.entity.WxFilmInfo;
 import com.github.niefy.modules.wx.entity.WxTaskInfo;
 import com.github.niefy.modules.wx.entity.WxTaskResoInfo;
 import com.github.niefy.modules.wx.service.impl.WxFilmProcessServiceImpl;
@@ -49,18 +50,32 @@ public class WxFilmProcessServiceImplTest {
     }
 
 
-    @Test
-    void queryTasksResourceProcessTest(){
-//        WxTaskResoInfo wxTaskResoInfo = wxTaskResoInfoMapper.selectOne(new QueryWrapper<WxTaskResoInfo>().eq("task_name", "影url"));
-        WxTaskResoInfo wxTaskResoInfo1 = wxTaskResoInfoMapper.selectOne(new LambdaQueryWrapper<WxTaskResoInfo>().eq(WxTaskResoInfo::getTaskName,"影url"));
-        System.out.println(wxTaskResoInfo1);
-    }
 
     @Test
     void addCategoryProcessorTest(){
         wxFilmProcessService.addCategoryProcessor();
     }
 
+
+    @Test
+    void addSubCategoryListTest() {
+        WxFilmInfo wxFilmInfo =new WxFilmInfo();
+        wxFilmInfo.setFilmId(6);
+        wxFilmInfo.setIsSingle("0");
+        wxFilmInfo.setIsFollowUp("0");
+        wxFilmInfo.setFilmName("黑夜传说");
+        wxFilmInfo.setFilmType(1);
+//        wxFilmProcessService.addSubCategoryList(wxFilmInfo);
+
+        WxFilmInfo wxFilmInfo1 =new WxFilmInfo();
+        wxFilmInfo1.setFilmId(2);
+        wxFilmInfo1.setIsSingle("0");
+        wxFilmInfo1.setIsFollowUp("1");
+        wxFilmInfo1.setFilmName("斯巴达克斯");
+        wxFilmInfo1.setFilmType(2);
+        wxFilmProcessService.addSubCategoryList(wxFilmInfo1);
+
+    }
 
 
 
