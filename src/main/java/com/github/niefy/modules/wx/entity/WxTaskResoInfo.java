@@ -31,6 +31,7 @@ public class WxTaskResoInfo   implements Serializable {
     @TableField(value = "`status`")
     private boolean status;
     private Integer parentId;
+    private boolean parentIdFromP;
     private Date updateTime;
 
     public WxTaskResoInfo() {

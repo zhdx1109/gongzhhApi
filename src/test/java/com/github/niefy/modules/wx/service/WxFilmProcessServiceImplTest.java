@@ -16,8 +16,11 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
+
 /**
  * @Author zhangdongxu
  * @Description create bean
@@ -54,8 +57,16 @@ public class WxFilmProcessServiceImplTest {
     //此方法用于生成资源目录
     @Test
     void addCategoryProcessorTest(){
-        wxFilmProcessService.addCategoryProcessor();
+        List<String> strings = Arrays.asList("1", "2", "3");
+        wxFilmProcessService.addCategoryProcessor(strings,false);
     }
+
+    @Test
+    void delFilmResourcesTest() {
+        wxFilmProcessService.delFilmResources("1",1,"");
+    }
+
+
 
 
     @Test
