@@ -15,6 +15,6 @@ public interface WxFilmService {
     //获取列表
     List<WxFilmInfo>queryFilmList(List<String> syncStatus);
 
-    List<WxFilmInfo> queryFilmInfoListForCategory(List<String> categoryList,String syncSytatus);
+    List<WxFilmInfo> queryFilmInfoListForCategory(List<String> categoryList,String syncStatus);
 
 }

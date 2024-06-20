@@ -33,10 +33,10 @@ public class WxFilmServiceImpl extends ServiceImpl<WxFilmInfoMapper, WxFilmInfo>
 
 
     @Override
-    public List<WxFilmInfo> queryFilmInfoListForCategory(List<String> categoryList,String syncStatus) {
+    public List<WxFilmInfo> queryFilmInfoListForCategory(List<String> categoryList, String syncStatus) {
 
         List<WxFilmInfo> wxFilmInfoList = wxFilmInfoMapper.selectList(new LambdaQueryWrapper<WxFilmInfo>().in(WxFilmInfo::getFilmType, categoryList)
-                .eq(WxFilmInfo::getSyncStatus,syncStatus));
+                .eq(WxFilmInfo::getSyncStatus, syncStatus));
         return wxFilmInfoList;
     }
 }

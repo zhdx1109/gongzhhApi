@@ -478,7 +478,7 @@ public class WxFilmProcessServiceImpl {
     }
 
     //根据当前资源类目生成
-    public void addCategoryProcessor(List<String> filmTypes, boolean isAddOrDelete) {
+    public void addCategoryProcessor(List<String> filmTypes, Integer addFilmId, String operator) {
 //        List<String> strings = Arrays.asList("1", "2", "3");
         List<WxFilmInfo> wxFilmInfoList = wxFilmService.queryFilmInfoListForCategory(filmTypes, "4");
         if (null == wxFilmInfoList || wxFilmInfoList.size() == 0) {
@@ -611,8 +611,14 @@ public class WxFilmProcessServiceImpl {
 
                 }
                 //添加subfilm 目录  删除和新增都不需要执行->
-                if (!isAddOrDelete) {
-                    addSubCategoryList(x);
+                if (!"del".equalsIgnoreCase(operator)) {
+                    if ("add".equalsIgnoreCase(operator)) {
+                        if (x.getFilmId().equals(addFilmId)) {
+                            addSubCategoryList(x);
+                        }
+                    } else {
+                        addSubCategoryList(x);
+                    }
                 }
 
             }
@@ -966,9 +972,9 @@ public class WxFilmProcessServiceImpl {
         //获取判断是 逻辑:获取 reply_rule 中资源类目，删除资源类目，删除资源，更新taskReso taskInfo film.syncStatus=999(已经停用)
         List<MsgReplyRule> msgReplyRules = msgReplyRuleMapper.selectList(new LambdaQueryWrapper<MsgReplyRule>().eq(MsgReplyRule::getCategoryType, filmType)
                 .eq(MsgReplyRule::isParentIdFromP, false));
-        if (null != msgReplyRules) {
+        if (null != msgReplyRules && msgReplyRules.size() > 0) {
             List<Long> collect = msgReplyRules.stream().map(MsgReplyRule::getRuleId).collect(Collectors.toList());
-            if (null != collect) {
+            if (null != collect && collect.size() > 0) {
                 int i = msgReplyRuleMapper.deleteBatchIds(collect);
                 System.out.println("删除资源目录成功:" + i);
             }
@@ -977,22 +983,23 @@ public class WxFilmProcessServiceImpl {
         List<MsgReplyRule> msgReplyRules1 = msgReplyRuleMapper.selectList(new LambdaQueryWrapper<MsgReplyRule>().eq(MsgReplyRule::getCategoryType, filmType)
                 .eq(MsgReplyRule::isParentIdFromP, true)
                 .eq(MsgReplyRule::getParentId, filmId));
-        if (null != msgReplyRules1) {
-            List<Long> collect = msgReplyRules1.stream().map(MsgReplyRule::getRuleId).collect(Collectors.toList());
-            if (null != collect) {
-                int i = msgReplyRuleMapper.deleteBatchIds(collect);
+        if (null != msgReplyRules1 && msgReplyRules1.size() > 0) {
+            List<Long> collect1 = msgReplyRules1.stream().map(MsgReplyRule::getRuleId).collect(Collectors.toList());
+            if (null != collect1 && collect1.size() > 0) {
+                int i = msgReplyRuleMapper.deleteBatchIds(collect1);
                 System.out.println("删除资源导航:" + i);
             }
         }
         //单个作品需要 parentIdFromP=1  //更新taskInfo 和taskResoInfo
         if ("1".equalsIgnoreCase(isSingle)) {
+
             List<MsgReplyRule> msgReplyRules2 = msgReplyRuleMapper.selectList(new LambdaQueryWrapper<MsgReplyRule>().eq(MsgReplyRule::isParentIdFromP, true)
-                    .eq(MsgReplyRule::getParentId, filmId)
+                    .in(MsgReplyRule::getParentId, filmId)
                     .isNull(MsgReplyRule::getCategoryType));
-            if (null != msgReplyRules2) {
-                List<Long> collect = msgReplyRules2.stream().map(MsgReplyRule::getRuleId).collect(Collectors.toList());
-                if (null != collect) {
-                    int i = msgReplyRuleMapper.deleteBatchIds(collect);
+            if (null != msgReplyRules2 && msgReplyRules2.size() > 0) {
+                List<Long> collect2 = msgReplyRules2.stream().map(MsgReplyRule::getRuleId).collect(Collectors.toList());
+                if (null != collect2 && collect2.size() > 0) {
+                    int i = msgReplyRuleMapper.deleteBatchIds(collect2);
                     System.out.println("删除单个作品资源:" + i);
                 }
             }
@@ -1017,28 +1024,38 @@ public class WxFilmProcessServiceImpl {
             }
 
         } else {//非单个作品，
-            List<MsgReplyRule> msgReplyRules2 = msgReplyRuleMapper.selectList(new LambdaQueryWrapper<MsgReplyRule>().eq(MsgReplyRule::isParentIdFromP, false)
-                    .eq(MsgReplyRule::getParentId, filmId)
+
+            List<WxFilmSubInfo> wxFilmSubInfos = wxFilmSubInfoMapper.selectList(new LambdaQueryWrapper<WxFilmSubInfo>().eq(WxFilmSubInfo::getParentId, wxFilmInfo.getFilmId()));
+            if (null == wxFilmSubInfos || wxFilmSubInfos.size() == 0) {
+                return;
+            }
+            List<Integer> collectSubIds = wxFilmSubInfos.stream().map(WxFilmSubInfo::getFilmSubId).collect(Collectors.toList());
+            if (null == collectSubIds || collectSubIds.size() == 0) {
+                return;
+            }
+            List<MsgReplyRule> msgReplyRules3 = msgReplyRuleMapper.selectList(new LambdaQueryWrapper<MsgReplyRule>().eq(MsgReplyRule::isParentIdFromP, false)
+                    .in(MsgReplyRule::getParentId, collectSubIds)
                     .isNull(MsgReplyRule::getCategoryType));
-            if (null != msgReplyRules2) {
-                List<Long> collect = msgReplyRules2.stream().map(MsgReplyRule::getRuleId).collect(Collectors.toList());
-                if (null != collect) {
-                    int i = msgReplyRuleMapper.deleteBatchIds(collect);
+            if (null != msgReplyRules3 && msgReplyRules3.size() > 0) {
+                List<Long> collect3 = msgReplyRules3.stream().map(MsgReplyRule::getRuleId).collect(Collectors.toList());
+                if (null != collect3 && collect3.size() > 0) {
+                    int i = msgReplyRuleMapper.deleteBatchIds(collect3);
                     System.out.println("删除连续性影视资源:" + i);
                 }
             }
             //查询是多个
             List<WxTaskResoInfo> wxTaskResoInfos = wxTaskResoInfoMapper.selectList(new LambdaQueryWrapper<WxTaskResoInfo>().eq(WxTaskResoInfo::isParentIdFromP, false)
-                    .eq(WxTaskResoInfo::getParentId, filmId));
+                    .in(WxTaskResoInfo::getParentId, collectSubIds));
             if (null != wxTaskResoInfos && wxTaskResoInfos.size() > 0) {
                 wxTaskResoInfos.stream().forEach(x -> {
                     x.setSyncUsed(false);
                     x.setUpdateTime(new Date());
+                    x.setTaskId(null);
                     wxTaskResoInfoMapper.updateById(x);
                 });
-                List<Integer> collect = wxTaskResoInfos.stream().map(WxTaskResoInfo::getTaskId).collect(Collectors.toList());
-                if (null != collect) {
-                    List<WxTaskInfo> wxTaskInfos = wxTaskInfoMapper.selectBatchIds(collect);
+                List<Integer> collect4 = wxTaskResoInfos.stream().map(WxTaskResoInfo::getTaskId).collect(Collectors.toList());
+                if (null != collect4 && collect4.size() > 0) {
+                    List<WxTaskInfo> wxTaskInfos = wxTaskInfoMapper.selectBatchIds(collect4);
                     if (!wxTaskInfos.isEmpty()) {
                         wxTaskInfos.stream().forEach(x -> {
                             x.setSyncUsed(false);
@@ -1055,6 +1072,44 @@ public class WxFilmProcessServiceImpl {
         wxFilmInfoMapper.updateById(wxFilmInfo);
         //生成新的影视导航。
         List<String> strings = Arrays.asList(filmType);
-        addCategoryProcessor(strings, true);
+        addCategoryProcessor(strings, null, "del");
     }
+
+
+    /**
+     * @param filmType 影视类型
+     * @param filmId   影视id
+     * @param filmName 影视名称
+     */
+    @Transactional
+    public void addFilmInfo(String filmType, Integer filmId, String filmName) {
+        //逻辑 删除对应的目录资源: 2 生成新的目录资源和资源条目
+        WxFilmInfo wxFilmInfo = wxFilmInfoMapper.selectOne(new LambdaQueryWrapper<WxFilmInfo>().eq(WxFilmInfo::getFilmId, filmId)
+                .eq(WxFilmInfo::getFilmName, filmName)
+                .eq(WxFilmInfo::getFilmType, filmType));
+        if (null == wxFilmInfo) {
+            System.out.println("无此删除信息");
+            return;
+        }
+        String isSingle = wxFilmInfo.getIsSingle();
+        if (StringUtil.isNullOrEmpty(isSingle)) {
+            System.out.println("删除 isSingle 为空");
+            return;
+        }
+        //获取判断是 逻辑:获取 reply_rule 中资源类目，删除资源类目，删除资源，更新taskReso taskInfo film.syncStatus=999(已经停用)
+        List<MsgReplyRule> msgReplyRules = msgReplyRuleMapper.selectList(new LambdaQueryWrapper<MsgReplyRule>().eq(MsgReplyRule::getCategoryType, filmType)
+                .eq(MsgReplyRule::isParentIdFromP, false));
+        if (null != msgReplyRules && msgReplyRules.size() > 0) {
+            List<Long> collect = msgReplyRules.stream().map(MsgReplyRule::getRuleId).collect(Collectors.toList());
+            if (null != collect && collect.size() > 0) {
+                int i = msgReplyRuleMapper.deleteBatchIds(collect);
+                System.out.println("删除资源目录成功:" + i);
+            }
+        }
+        List<String> strings = Arrays.asList(filmType);
+        addCategoryProcessor(strings, filmId, "add");
+
+
+    }
+
 }

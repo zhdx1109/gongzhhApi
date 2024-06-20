@@ -58,12 +58,19 @@ public class WxFilmProcessServiceImplTest {
     @Test
     void addCategoryProcessorTest(){
         List<String> strings = Arrays.asList("1", "2", "3");
-        wxFilmProcessService.addCategoryProcessor(strings,false);
+        wxFilmProcessService.addCategoryProcessor(strings,null,"all");
     }
 
     @Test
     void delFilmResourcesTest() {
-        wxFilmProcessService.delFilmResources("1",1,"");
+//        wxFilmProcessService.delFilmResources("1",4,"影");
+//        wxFilmProcessService.delFilmResources("2",12,"黑社会的我成为高中生");
+        wxFilmProcessService.delFilmResources("1",13,"秦");
+    }
+
+    @Test
+    void addFilmInfoTest() {
+        wxFilmProcessService.addFilmInfo("1",13,"秦");
     }
 
 
