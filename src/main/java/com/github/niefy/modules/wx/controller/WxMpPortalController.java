@@ -77,6 +77,7 @@ public class WxMpPortalController {
         if (encType == null) {
 
             try {
+                //todo 此处为url截取方法
                 requestBody = contentValidator.validateAndReplace(requestBody);
             } catch (Exception e) {
                 e.printStackTrace();
