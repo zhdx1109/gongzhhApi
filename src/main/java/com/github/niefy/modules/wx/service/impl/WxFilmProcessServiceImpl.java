@@ -205,6 +205,7 @@ public class WxFilmProcessServiceImpl {
             if (!parentIdNoECount.containsKey(x.getFilmId())) {
                 updateFilmStatus(x, "4");
             }
+            System.out.println("is_single =1");
         });
 
         //取出需要的Map<Integer,WxFilmInfo> //此处的作用是将作品的id和bean进行对等。过滤掉孤品影视
@@ -241,6 +242,7 @@ public class WxFilmProcessServiceImpl {
             String strCurrURL = "";
 
 
+
             for (int i = 0; i < wxFilmSubInfos1.size(); i++) {
                 WxFilmSubInfo wxFilmSubInfo = wxFilmSubInfos1.get(i);
                 String filmNameDec = "", filmName = "", startValue = "";
@@ -250,6 +252,7 @@ public class WxFilmProcessServiceImpl {
                 startValue = wxFilmInfo.getStartValue();
                 Integer filmSubId = wxFilmSubInfo.getFilmSubId();
                 String seriesValue = wxFilmSubInfo.getSeriesValue();
+
                 if ("1".equals(wxFilmInfo.getIsFollowUp())) { //1 是
                     String[] parts = seriesValue.split("-");
                     String lastPart = parts[parts.length - 1]; // 取数组的最后一个元素
@@ -335,6 +338,8 @@ public class WxFilmProcessServiceImpl {
                 }
             }
         }
+
+        System.out.println("update wxfilmsInfo status");
         if (null != parentIdNoECount && parentIdNoECount.size() > 0) {
 
             for (WxFilmInfo wx : wxFilmInfoList) {
@@ -480,13 +485,15 @@ public class WxFilmProcessServiceImpl {
     //根据当前资源类目生成
     public void addCategoryProcessor(List<String> filmTypes, Integer addFilmId, String operator) {
 //        List<String> strings = Arrays.asList("1", "2", "3");
+        int countListSize = 4;
+        int pageNum = 5;
         List<WxFilmInfo> wxFilmInfoList = wxFilmService.queryFilmInfoListForCategory(filmTypes, "4");
         if (null == wxFilmInfoList || wxFilmInfoList.size() == 0) {
             return;
         }
 
         //根据类目进行过滤
-        Map<Integer, List<WxFilmInfo>> collectAllMap = wxFilmInfoList.stream().sorted(Comparator.comparing(WxFilmInfo::getUpdateTime)).collect(Collectors.groupingBy(WxFilmInfo::getFilmType));
+        Map<Integer, List<WxFilmInfo>> collectAllMap = wxFilmInfoList.stream().sorted(Comparator.comparing(WxFilmInfo::getUpdateTime).reversed()).collect(Collectors.groupingBy(WxFilmInfo::getFilmType));
         if (null == collectAllMap || collectAllMap.size() == 0) {
             return;
         }
@@ -513,21 +520,21 @@ public class WxFilmProcessServiceImpl {
 
             boolean isSave = false;
             String strFilm1A = "";
-            int quotient = filmType1Size / 3;//整数部分
-            int remainder = filmType1Size % 3; //余数部分
+            int quotient = filmType1Size / pageNum;//整数部分
+            int remainder = filmType1Size % pageNum; //余数部分
             int k1 = 1;
             String more = "";
             for (int j = 1; j <= filmType1Size; j++) {//从1 开始 执行到 相等 12345  size =5
                 WxFilmInfo x = wxFilmTypeList.get(j - 1);
                 strFilm1A = strFilm1A + +j + ": <a href=\"weixin://bizmsgmenu?msgmenucontent=" + x.getFilmName() + "&msgmenuid=1\">" + x.getFilmName() + "</a> \n";
 
-                if (filmType1Size > 2) {
-                    if (j == 2) {
+                if (filmType1Size > countListSize) {
+                    if (j == countListSize) {
                         //第一次存:电影类目->记录一个总的 第一次只展示5个
                         isSave = true;
                     } else {
                         //更多次存:(更多电影) 展示10个 测试展示 3个
-                        if ((j / 3) == k1 && (j % 3) == 0) {
+                        if ((j / pageNum) == k1 && (j % pageNum) == 0) {
                             ruleName = "更多" + valueByCode;//更多电影0
                             matchValueForFilm1 = ruleName + (k1 - 1);//需要请空掉strFilm1A
                             String nextMore = ruleName + k1;
@@ -591,7 +598,7 @@ public class WxFilmProcessServiceImpl {
                     msgreplyRule.setExactMatch(true);
                     msgreplyRule.setReplyType("text");
 
-                    if (filmType1Size > 2) {
+                    if (filmType1Size > countListSize) {
                         more = "\n<a href=\"weixin://bizmsgmenu?msgmenucontent=更多" + valueByCode + "0" + "&msgmenuid=1\">更多" + valueByCode + "" + "</a> \n";
                     }
                     msgreplyRule.setReplyContent(content1 + "\n" + strFilm1A + more);
@@ -634,6 +641,8 @@ public class WxFilmProcessServiceImpl {
      * @param wxFilmInfo
      */
     public void addSubCategoryList(WxFilmInfo wxFilmInfo) {
+        int countSubListSize= 4;
+        int pageSubNub= 5;
         String isSingle = wxFilmInfo.getIsSingle();
         if ("1".equalsIgnoreCase(isSingle)) {
             return;
@@ -674,12 +683,12 @@ public class WxFilmProcessServiceImpl {
             String strFilm1A = "";
             int size = comparingByPriority.size();
             String contentPre = filmName + "(共" + size + "部)";
-            int quotientSub = size / 3;//整数部分
-            int remainderSub = size % 3; //余数部分
+            int quotientSub = size / pageSubNub;//整数部分
+            int remainderSub = size % pageSubNub; //余数部分
             boolean isSave = false;
             int k1Sub = 1;
             String moreSub = "";
-            extractedReplyRuleCategoryList(filmName, filmType, sdf, comparingByPriority, ruleName, matchValue, strFilm1A, size, contentPre, quotientSub, remainderSub, isSave, k1Sub, moreSub, filmId);
+            extractedReplyRuleCategoryList(filmName, filmType, sdf, comparingByPriority, ruleName, matchValue, strFilm1A, size, contentPre, quotientSub, remainderSub, isSave, k1Sub, moreSub, filmId,countSubListSize,pageSubNub);
 
         } else if ("1".equalsIgnoreCase(isFollowUp)) {
             int subInfoSize = wxFilmSubInfos.size();
@@ -712,8 +721,8 @@ public class WxFilmProcessServiceImpl {
                 }
                 List<MsgReplyRule> comparingByPriority = collect.stream().sorted(Comparator.comparing(MsgReplyRule::getPriority)).collect(Collectors.toList());
                 int size = comparingByPriority.size();
-                int quotientSub = size / 3;//整数部分
-                int remainderSub = size % 3; //余数部分
+                int quotientSub = size / pageSubNub;//整数部分
+                int remainderSub = size % pageSubNub; //余数部分
                 boolean isSave = false;
                 int k1Sub = 1;
                 String contentSeasonPre = filmSubNameA + "(共" + size + "集)";
@@ -725,12 +734,12 @@ public class WxFilmProcessServiceImpl {
                     matchValue = "";
                     MsgReplyRule msgReplyRule = comparingByPriority.get(i - 1);
                     strFilmReplyA = strFilmReplyA + +i + ": <a href=\"weixin://bizmsgmenu?msgmenucontent=" + msgReplyRule.getMatchValue() + "&msgmenuid=1\">" + msgReplyRule.getMatchValue() + "</a> \n";
-                    if (size > 2) {
-                        if (i == 2) {
+                    if (size > countSubListSize) {
+                        if (i == countSubListSize) {
                             isSave = true;
                         } else {
 
-                            if ((i / 3) == k1Sub && (i % 3) == 0) {
+                            if ((i / pageSubNub) == k1Sub && (i % pageSubNub) == 0) {
                                 ruleName = "更多" + filmSubNameA;//更多电影0
                                 matchValue = ruleName + (k1Sub - 1);//需要请空掉strFilm1A
                                 String nextMore = ruleName + k1Sub;
@@ -794,7 +803,7 @@ public class WxFilmProcessServiceImpl {
                         msgreplyRule.setRuleName(filmSubNameA);
                         msgreplyRule.setMatchValue(filmSubNameA);
                         matchValue = filmSubNameA;
-                        if (size > 2) {
+                        if (size > countSubListSize) {
                             moreSub = "\n<a href=\"weixin://bizmsgmenu?msgmenucontent=更多" + filmSubNameA + "0" + "&msgmenuid=1\">更多" + filmSubNameA + "" + "</a> \n";
                         }
                         msgreplyRule.setReplyContent(contentSeasonPre + "\n" + strFilmReplyA + moreSub);
@@ -851,16 +860,16 @@ public class WxFilmProcessServiceImpl {
 
     }
 
-    private void extractedReplyRuleCategoryList(String filmName, Integer filmType, SimpleDateFormat sdf, List<MsgReplyRule> comparingByPriority, String ruleName, String matchValue, String strFilm1A, int size, String contentPre, int quotientSub, int remainderSub, boolean isSave, int k1Sub, String moreSub, Integer filmId) {
+    private void extractedReplyRuleCategoryList(String filmName, Integer filmType, SimpleDateFormat sdf, List<MsgReplyRule> comparingByPriority, String ruleName, String matchValue, String strFilm1A, int size, String contentPre, int quotientSub, int remainderSub, boolean isSave, int k1Sub, String moreSub, Integer filmId,int countSubListSize,int pageSubNub) {
         for (int j = 1; j <= size; j++) {
             MsgReplyRule msgReplyRule = comparingByPriority.get(j - 1);
             strFilm1A = strFilm1A + +j + ": <a href=\"weixin://bizmsgmenu?msgmenucontent=" + msgReplyRule.getMatchValue() + "&msgmenuid=1\">" + msgReplyRule.getMatchValue() + "</a> \n";
-            if (size > 2) {
-                if (j == 2) {
+            if (size > countSubListSize) {
+                if (j == countSubListSize) {
                     isSave = true;
                 } else {
 
-                    if ((j / 3) == k1Sub && (j % 3) == 0) {
+                    if ((j / pageSubNub) == k1Sub && (j % pageSubNub) == 0) {
                         ruleName = "更多" + filmName;//更多电影0
                         matchValue = ruleName + (k1Sub - 1);//需要请空掉strFilm1A
                         String nextMore = ruleName + k1Sub;
@@ -922,7 +931,7 @@ public class WxFilmProcessServiceImpl {
                 MsgReplyRule msgreplyRule = new MsgReplyRule();
                 msgreplyRule.setRuleName(ruleName);
                 msgreplyRule.setMatchValue(matchValue);
-                if (size > 2) {
+                if (size > countSubListSize) {
                     moreSub = "\n<a href=\"weixin://bizmsgmenu?msgmenucontent=更多" + filmName + "0" + "&msgmenuid=1\">更多" + filmName + "" + "</a> \n";
                 }
                 msgreplyRule.setReplyContent(contentPre + "\n" + strFilm1A + moreSub);
