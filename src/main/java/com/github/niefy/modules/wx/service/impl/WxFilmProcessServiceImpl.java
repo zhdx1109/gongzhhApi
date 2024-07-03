@@ -1,17 +1,13 @@
 package com.github.niefy.modules.wx.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.niefy.common.utils.Json;
 import com.github.niefy.modules.wx.dao.*;
 import com.github.niefy.modules.wx.entity.*;
 import com.github.niefy.modules.wx.enums.FilmTypeEnum;
 import com.github.niefy.modules.wx.service.WxFilmService;
 import com.github.niefy.modules.wx.service.WxFilmSubService;
-import com.sun.org.apache.bcel.internal.generic.ARETURN;
 import io.netty.util.internal.StringUtil;
-import io.swagger.models.auth.In;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -398,7 +394,7 @@ public class WxFilmProcessServiceImpl {
                         Optional<WxTaskInfo> min = wxTaskInfos.stream().min(Comparator.comparing(WxTaskInfo::getTaskId));
                         wxTaskInfo = min.get();
                         taskName = wxTaskInfo.getTaskName();//打开QQ阅读->
-                        taskUrlCode = wxTaskInfo.getTaskUrlCode();//穿成了反派崽崽的亲妈
+                        taskUrlCode = wxTaskInfo.getTaskUrlCode().trim();//穿成了反派崽崽的亲妈
                         //需要判断 taskUrlCode 是否重复，如果是需要删除词条数据。并重新查询
                         MsgReplyRule msgReplyRule = msgReplyRuleMapper.selectOne(new LambdaQueryWrapper<MsgReplyRule>().eq(MsgReplyRule::getMatchValue, taskUrlCode));
                         if (null != msgReplyRule) {

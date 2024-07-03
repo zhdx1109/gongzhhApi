@@ -64,14 +64,15 @@ public class WxFilmProcessServiceImplTest {
     @Test
     void delFilmResourcesTest() {
 //        wxFilmProcessService.delFilmResources("1",4,"影");
-        wxFilmProcessService.delFilmResources("2",12,"黑社会的我成为高中生");
+        wxFilmProcessService.delFilmResources("1",33,"老千");
 //        wxFilmProcessService.delFilmResources("1",13,"秦");
     }
 
     @Test
     void addFilmInfoTest() {
-//        wxFilmProcessService.addFilmInfo("1",13,"秦");
-        wxFilmProcessService.addFilmInfo("2",12,"黑社会的我成为高中生");
+        wxFilmProcessService.addFilmInfo("1",33,"老千");
+//        wxFilmProcessService.addFilmInfo("2",31,"黑暗荣耀");
+//        wxFilmProcessService.addFilmInfo("1",28,"九龙城寨之围城");
 
     }
 
